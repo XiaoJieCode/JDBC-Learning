@@ -61,35 +61,117 @@
         System.out.println("执行情况: " + (count == 1 ? "保存成功" : "保存失败"));
         ```
 
-    2. 执行 查询sql语句
+    
 
-        ```java
-        ResultSet resultSet = null;
-        String sql = "select stu_num from students";  // 查询students的所有字段
-        resultSet = statement.executeQuery("select * from classes");
-        
-        // 算法
-        int column = 1;
-        while (true) {
-            try {
-                System.out.print(
-                    resultSet.getString(column)  // 获取字段对应的内容
-                                 + "\t"   // 格式化输出
-                );
-                column++;
-            } catch (SQLException e) {
-                column = 1;
-                System.out.println();  // 换行
-                if (!resultSet.next()) 
-                {
-                    break;
-                }
-            }
-        }
-        ```
-
-        
+    
 
 5. 处理查询结果集
 
+   1. 执行查询sql语句
+
+    ```java
+    ResultSet resultSet = null;
+    String sql = "select stu_num from students";  // 查询students的所有字段
+    resultSet = statement.executeQuery("select * from classes");
+    
+    // 算法
+    int column = 1;
+    while (true) {
+        try {
+            System.out.print(
+                resultSet.getString(column)  // 获取字段对应的内容
+                             + "\t"   // 格式化输出
+            );
+            column++;
+        } catch (SQLException e) {
+            column = 1;
+            System.out.println();  // 换行
+            if (!resultSet.next()) 
+            {
+                break;
+            }
+        }
+    }
+    ```
+
+    
+
 6. 释放资源
+
+    - 执行sql相关对象的close()方法即可释放资源
+
+    - 执行前一定要判空
+
+    - 推荐释放资源写在finally{}中以确保一定执行释放资源语句
+
+    - 释放资源顺序为从小到大
+
+        - 例如上个例子中
+
+            我们应该先关闭结果集 ResultSet
+
+            再关闭 Statement
+
+            最后关闭 Connect
+
+        ```java
+        try {
+            if (resultSet != null) resultSet.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            if (statement != null) statement.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        
+        try {
+            if (connection != null) connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        ```
+
+
+
+# 四、创建一个简单的用户登录业务
+
+## 1. 数据准备
+
+- 创建表格users
+
+    ```mysql
+    create table users(
+    	id varchar(20) primary key,
+        password varchar(20) not null
+    );
+    ```
+
+    
+
+- 创建两个用户:  jack  和  wenjie
+
+    ```mysql
+    insert into users values(
+    	'jack', 123456
+    );
+    insert into users values(
+    	'wenjie', 666666
+    );
+    ```
+
+
+## 2. 业务逻辑
+
+- 用户输入分两次输入账号和密码登录
+- 获取用户账号密码对数据库进行查询
+- 验证成功显示登录成功，反之
+
+## 3. 代码实现
+
+```mysql
+
+```
+
