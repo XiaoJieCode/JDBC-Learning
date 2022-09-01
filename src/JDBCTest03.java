@@ -1,10 +1,9 @@
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.sql.*;
 import java.util.*;
 
-public class JDBCTest02 {
+public class JDBCTest03 {
     public static void main(String[] args) {
         // 首先调用getAccount()获取用户账号密码
         HashMap<String, String> accMap = getAccount();
@@ -21,7 +20,7 @@ public class JDBCTest02 {
         boolean isLogin = false;
         // 初始化数据库连接
         Connection connection = null;
-        Statement statement = null;
+        PreparedStatement ps = null;
         ResultSet resultSet = null;
         String driver = "";
         String url = "";
@@ -41,16 +40,29 @@ public class JDBCTest02 {
         try {
             Class.forName(driver);
             connection = DriverManager.getConnection(url,username,password);
-            statement = connection.createStatement();
+            // 设置不自动提交
+            connection.setAutoCommit(false);
 
+            // 提前写好sql语句模板
+            String sql = "select * from users where id = ? and password = ?";
+            ps = connection.prepareStatement(sql);
             // 查询数据库是否有账户名，且密码是否正确
-            String sql = "select * from users where id='"+accMap.get("id")+"' and password='"+accMap.get("password")+"'";
+            ps.setString(1, accMap.get("id"));
+            ps.setString(2, accMap.get("password"));
 
-            resultSet = statement.executeQuery(sql);
+            resultSet = ps.executeQuery(sql);
 
             // 如果查询到数据则说明数据库中有该账户
             if (resultSet.next()) isLogin = true;
-        } catch (ClassNotFoundException | SQLException e) {
+
+            // 提交
+            connection.commit();
+        } catch (Exception e) {
+            try {
+                if (connection != null) connection.rollback();
+            } catch (SQLException ex) {
+                ex.printStackTrace();
+            }
             e.printStackTrace();
         } finally {
             try {
@@ -60,7 +72,7 @@ public class JDBCTest02 {
             }
 
             try {
-                if (statement != null) statement.close();
+                if (ps != null) ps.close();
             } catch (SQLException e) {
                 e.printStackTrace();
             }
