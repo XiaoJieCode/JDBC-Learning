@@ -13,17 +13,83 @@
 
 # 二、JDBC开发前的准备工作
 
-## 1. 配置SQL数据库的驱动
+- 配置SQL数据库的驱动
 
-## 2. 配置驱动环境变量
+## 
 
 # 三、JDBC编程6步
 
 - **演示程序为JDBCTest01.java**
 
 1. 注册驱动
+
+    ```java
+    // 在MySQL8.0版本以后调用com.mysql.cj.jdbc.Driver的静态代码块就能完成驱动的注册
+    Class.forName("com.mysql.cj.jdbc.Driver");
+    ```
+
 2. 获取连接
+
+    ```java
+    connection = DriverManager.getConnection(url, user, password);
+    ```
+
+    - url:sql访问地址  jdbc:mysql://127.0.0.1:3306/mydatabase
+        - jdbc:mysql://  表示mysql协议
+        - 127.0.0.1为本地ip  也可用localhost代替
+        - 3306为数据库端口
+        - mydatabase为需要访问的数据库
+    - user：数据库用户名
+    - passwor：数据库密码
+
 3. 获取数据库操作对象
+
+    ```java
+    statement = connection.createStatement();
+    ```
+
+    - 所有的sql语句将在statement对象中执行
+
 4. 执行SQL语句
+
+    1. 执行增删改sql语句
+
+        ```java
+        String sql = "insert into students values(\"2022010105\", \"老六\", \" 男\" , 18, 220101)";
+        int count = statement.executeUpdate(sql)
+        // 检查返回值 返回值为1则说明执行成功, 反之异常
+        System.out.println("执行情况: " + (count == 1 ? "保存成功" : "保存失败"));
+        ```
+
+    2. 执行 查询sql语句
+
+        ```java
+        ResultSet resultSet = null;
+        String sql = "select stu_num from students";  // 查询students的所有字段
+        resultSet = statement.executeQuery("select * from classes");
+        
+        // 算法
+        int column = 1;
+        while (true) {
+            try {
+                System.out.print(
+                    resultSet.getString(column)  // 获取字段对应的内容
+                                 + "\t"   // 格式化输出
+                );
+                column++;
+            } catch (SQLException e) {
+                column = 1;
+                System.out.println();  // 换行
+                if (!resultSet.next()) 
+                {
+                    break;
+                }
+            }
+        }
+        ```
+
+        
+
 5. 处理查询结果集
+
 6. 释放资源
